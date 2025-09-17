@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getGroupById, getExpensesByGroupId, calculateBalances, getFriends, createFriend, addFriendToGroup } from './api';
+import { getGroupById, getExpensesForGroup, calculateBalances, getFriends, createFriend, addFriendToGroup } from './api';
 import './App.css';
 
 function GroupDetail() {
@@ -17,7 +17,7 @@ function GroupDetail() {
         try {
             const groupData = await getGroupById(groupId);
             setGroup(groupData);
-            const expensesData = await getExpensesByGroupId(groupId);
+            const expensesData = await getExpensesForGroup(groupId);
             setExpenses(expensesData);
             const balancesData = await calculateBalances(groupId);
             setBalances(balancesData);
@@ -32,30 +32,28 @@ function GroupDetail() {
         fetchData();
     }, [groupId]);
 
-   const handleAddFriendSubmit = async (e) => {
-    e.preventDefault();
-    try {
-        let friendId = newFriendId;
-        if (isAddingNewFriend && newFriendName) {
-            const newFriend = await createFriend(newFriendName);
-            friendId = newFriend.id;
-        }
+    const handleAddFriendSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            let friendId = newFriendId;
+            if (isAddingNewFriend && newFriendName) {
+                const newFriend = await createFriend(newFriendName);
+                friendId = newFriend.id;
+            }
 
-        if (friendId) {
-            await addFriendToGroup(groupId, friendId);
-            alert('Friend added to group and shares recalculated!');
-            setNewFriendId('');
-            setNewFriendName('');
-            setIsAddingNewFriend(false);
-            
-            // <-- ADD THIS LINE
-            fetchData(); // Re-fetch data to update the UI
+            if (friendId) {
+                await addFriendToGroup(groupId, friendId);
+                alert('Friend added to group and shares recalculated!');
+                setNewFriendId('');
+                setNewFriendName('');
+                setIsAddingNewFriend(false);
+                fetchData(); // Re-fetch data to update the UI
+            }
+        } catch (error) {
+            console.error('Error adding friend to group:', error);
+            alert('Failed to add friend. Check console for details.');
         }
-    } catch (error) {
-        console.error('Error adding friend to group:', error);
-        alert('Failed to add friend. Check console for details.');
-    }
-};
+    };
 
     if (!group) {
         return <div className="container">Loading group details...</div>;
@@ -112,7 +110,15 @@ function GroupDetail() {
                     <ul>
                         {expenses.map(expense => (
                             <li key={expense.id}>
-                                <strong>{expense.description}</strong> - Paid by {expense.paidBy.name} for ${expense.amount.toFixed(2)}
+                                <strong>{expense.description}</strong>
+                                <span> - Paid by 
+                                    {expense.payments.map((payment, index) => (
+                                        <span key={payment.id}>
+                                            {payment.friend.name} for ${payment.amount.toFixed(2)}{index < expense.payments.length - 1 ? ', ' : ''}
+                                        </span>
+                                    ))}
+                                </span>
+                                <span> - Total: ${expense.amount.toFixed(2)}</span>
                             </li>
                         ))}
                     </ul>

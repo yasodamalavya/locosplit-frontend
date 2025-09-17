@@ -22,10 +22,12 @@ export const createFriend = async (friendName) => {
     return response.data;
 };
 
-export const createGroup = async (groupName, initialMemberId) => {
+// Corrected function: Takes a list of member IDs and formats the payload
+export const createGroup = async (groupName, memberIds) => {
+    const membersPayload = memberIds.map(id => ({ id: id }));
     const response = await axios.post(`${API_BASE_URL}/groups`, {
         name: groupName,
-        members: [{ id: initialMemberId }]
+        members: membersPayload
     });
     return response.data;
 };
@@ -35,8 +37,7 @@ export const addExpense = async (expenseData) => {
     return response.data;
 };
 
-// This is the function that was missing.
-export const getExpensesByGroupId = async (groupId) => {
+export const getExpensesForGroup = async (groupId) => {
     const response = await axios.get(`${API_BASE_URL}/expenses/group/${groupId}`);
     return response.data;
 };
