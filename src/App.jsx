@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import LoginPage from './LoginPage.jsx';
 import { getGroups, getFriends, deleteFriend, deleteGroup } from './api';
 import './App.css';
 
@@ -8,6 +9,15 @@ function App() {
   const [friends, setFriends] = useState([]);
   const [openGroups, setOpenGroups] = useState(true);
   const [openFriends, setOpenFriends] = useState(true);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // Check local storage for a logged-in user on initial load
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   const fetchAllData = async () => {
     try {
@@ -20,8 +30,10 @@ function App() {
   };
 
   useEffect(() => {
-    fetchAllData();
-  }, []);
+    if (user) {
+        fetchAllData();
+    }
+  }, [user]);
 
   const handleDeleteFriend = async (id) => {
     try {
@@ -46,10 +58,25 @@ function App() {
       alert('Failed to delete group. Check console for details.');
     }
   };
+  
+  const handleLoginSuccess = (loggedInUser) => {
+    localStorage.setItem('user', JSON.stringify(loggedInUser));
+    setUser(loggedInUser);
+  };
+  
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+  };
+  
+  if (!user) {
+    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+  }
 
   return (
     <div className="homepage-container">
       <h1>My LocalSplit App</h1>
+      <button onClick={handleLogout} className="button" style={{ position: 'absolute', top: '20px', right: '20px' }}>Logout</button>
       <Link to="/add-expense" className="button">Add a New Expense</Link>
       
       <div className="flex-sections">
@@ -78,18 +105,12 @@ function App() {
             <h2>Your Friends</h2>
           </div>
           <div className={`dropdown-content ${openFriends ? 'open' : ''}`}>
-            {friends.length > 0 ? (
-              <ul>
-                {friends.map((friend) => (
-                  <li key={friend.id} className="dropdown-item">
-                    <span>{friend.name}</span>
-                    <button onClick={() => handleDeleteFriend(friend.id)} className="delete-button">Delete</button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No friends added yet.</p>
-            )}
+            {friends.map((friend) => (
+              <li key={friend.id} className="dropdown-item">
+                <span>{friend.name}</span>
+                <button onClick={() => handleDeleteFriend(friend.id)} className="delete-button">Delete</button>
+              </li>
+            ))}
           </div>
         </div>
       </div>
