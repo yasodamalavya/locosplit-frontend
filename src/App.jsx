@@ -6,7 +6,7 @@ import './App.css';
 function App() {
   const [groups, setGroups] = useState([]);
   const [friends, setFriends] = useState([]);
-  const [openGroups, setOpenGroups] = useState(true); // State to manage dropdown open/close
+  const [openGroups, setOpenGroups] = useState(true);
   const [openFriends, setOpenFriends] = useState(true);
 
   const fetchAllData = async () => {
@@ -48,47 +48,49 @@ function App() {
   };
 
   return (
-    <div className="main-container">
+    <div className="homepage-container">
       <h1>My LocalSplit App</h1>
       <Link to="/add-expense" className="button">Add a New Expense</Link>
       
-      <div className="section">
-        <div className="dropdown-header" onClick={() => setOpenGroups(!openGroups)}>
-          <h2>Your Groups</h2>
+      <div className="flex-sections">
+        <div className="section-card">
+          <div className="dropdown-header" onClick={() => setOpenGroups(!openGroups)}>
+            <h2>Your Groups</h2>
+          </div>
+          <div className={`dropdown-content ${openGroups ? 'open' : ''}`}>
+            {groups.length > 0 ? (
+              <ul>
+                {groups.map((group) => (
+                  <li key={group.id} className="dropdown-item">
+                    <Link to={`/groups/${group.id}`}>{group.name}</Link>
+                    <button onClick={() => handleDeleteGroup(group.id)} className="delete-button">Delete</button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No groups created yet.</p>
+            )}
+          </div>
         </div>
-        <div className={`dropdown-content ${openGroups ? 'open' : ''}`}>
-          {groups.length > 0 ? (
-            <ul>
-              {groups.map((group) => (
-                <li key={group.id} className="dropdown-item">
-                  <Link to={`/groups/${group.id}`}>{group.name}</Link>
-                  <button onClick={() => handleDeleteGroup(group.id)} className="delete-button">Delete</button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>No groups created yet.</p>
-          )}
-        </div>
-      </div>
 
-      <div className="section">
-        <div className="dropdown-header" onClick={() => setOpenFriends(!openFriends)}>
-          <h2>Your Friends</h2>
-        </div>
-        <div className={`dropdown-content ${openFriends ? 'open' : ''}`}>
-          {friends.length > 0 ? (
-            <ul>
-              {friends.map((friend) => (
-                <li key={friend.id} className="dropdown-item">
-                  <span>{friend.name}</span>
-                  <button onClick={() => handleDeleteFriend(friend.id)} className="delete-button">Delete</button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>No friends added yet.</p>
-          )}
+        <div className="section-card">
+          <div className="dropdown-header" onClick={() => setOpenFriends(!openFriends)}>
+            <h2>Your Friends</h2>
+          </div>
+          <div className={`dropdown-content ${openFriends ? 'open' : ''}`}>
+            {friends.length > 0 ? (
+              <ul>
+                {friends.map((friend) => (
+                  <li key={friend.id} className="dropdown-item">
+                    <span>{friend.name}</span>
+                    <button onClick={() => handleDeleteFriend(friend.id)} className="delete-button">Delete</button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No friends added yet.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

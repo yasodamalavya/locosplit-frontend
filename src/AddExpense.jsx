@@ -44,13 +44,12 @@ function AddExpense() {
         }));
     };
 
-const handlePaymentChange = (friendId, amount) => {
-    // Correctly handles empty strings and numeric values
-    setPayments(prevPayments => ({
-        ...prevPayments,
-        [friendId]: amount === '' ? '' : parseFloat(amount) || 0
-    }));
-};
+    const handlePaymentChange = (friendId, amount) => {
+        setPayments(prevPayments => ({
+            ...prevPayments,
+            [friendId]: amount === '' ? '' : parseFloat(amount) || 0
+        }));
+    };
 
     const handleNewFriendChange = (e) => {
         setNewFriendName(e.target.value);
@@ -72,58 +71,58 @@ const handlePaymentChange = (friendId, amount) => {
         }
     };
     
-   const handleSubmit = async (e) => {
-    e.preventDefault();
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-    try {
-        let finalGroupId = formData.groupId;
-        const finalPayments = Object.entries(payments)
-            .filter(([id, amount]) => amount > 0)
-            .map(([id, amount]) => ({
-                friend: { id: parseInt(id) },
-                amount: parseFloat(amount)
-            }));
-        
-        // Corrected: memberIds should include all friends, not just the ones who paid
-        const memberIds = friends.map(friend => friend.id);
+        try {
+            let finalGroupId = formData.groupId;
+            const finalPayments = Object.entries(payments)
+                .filter(([id, amount]) => amount > 0)
+                .map(([id, amount]) => ({
+                    friend: { id: parseInt(id) },
+                    amount: parseFloat(amount)
+                }));
+            
+            const allMemberIds = friends.map(friend => friend.id);
 
-        if (formData.isNewGroup && formData.newGroupName) {
-            if (memberIds.length === 0) {
-                alert("A new group requires at least one member.");
+            if (formData.isNewGroup && formData.newGroupName) {
+                if (allMemberIds.length === 0) {
+                    alert("A new group requires at least one member.");
+                    return;
+                }
+                const newGroup = await createGroup(formData.newGroupName, allMemberIds);
+                finalGroupId = newGroup.id;
+            }
+
+            const totalPaid = Object.values(payments).reduce((sum, amount) => sum + amount, 0);
+            if (totalPaid <= 0) {
+                alert("The total expense amount must be greater than zero.");
                 return;
             }
-            const newGroup = await createGroup(formData.newGroupName, memberIds);
-            finalGroupId = newGroup.id;
+
+            const expensePayload = {
+                description: formData.description,
+                groupId: parseInt(finalGroupId),
+                payments: finalPayments,
+                allMemberIds: allMemberIds
+            };
+
+            await addExpense(expensePayload);
+            alert('Expense added successfully!');
+            navigate(`/groups/${finalGroupId}`);
+        } catch (error) {
+            console.error('Error adding expense:', error.response ? error.response.data : error.message);
+            alert('Failed to add expense. Check console for details.');
         }
-
-        const totalPaid = Object.values(payments).reduce((sum, amount) => sum + amount, 0);
-        if (totalPaid <= 0) {
-            alert("The total expense amount must be greater than zero.");
-            return;
-        }
-
-        const expensePayload = {
-            description: formData.description,
-            groupId: parseInt(finalGroupId),
-            payments: finalPayments
-        };
-
-        await addExpense(expensePayload);
-        alert('Expense added successfully!');
-        navigate(`/groups/${finalGroupId}`);
-    } catch (error) {
-        console.error('Error adding expense:', error.response ? error.response.data : error.message);
-        alert('Failed to add expense. Check console for details.');
-    }
-};
+    };
 
     return (
-        <div className="main-container">
+        <div className="add-expense-container">
             <h1>Add New Expense</h1>
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
                     <label>Description:</label>
-                    <input type="text" name="description" value={formData.description} onChange={handleFormChange} required />
+                    <input type="text" name="description" value={formData.description} onChange={handleFormChange} required className="form-control" />
                 </div>
                 
                 <div className="form-section">
@@ -165,15 +164,15 @@ const handlePaymentChange = (friendId, amount) => {
                     <h2>Who Paid & How Much?</h2>
                     <div className="payment-list">
                         {friends.map(friend => (
-                            <div className="payment-input">
-    <label>{friend.name} paid:</label>
-    <input
-        type="number"
-        className="form-control"
-        value={payments[friend.id]} // <-- REMOVED '|| '''
-        onChange={(e) => handlePaymentChange(friend.id, e.target.value)}
-    />
-</div>
+                            <div key={friend.id} className="payment-input">
+                                <label>{friend.name} paid:</label>
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    value={payments[friend.id] || ''}
+                                    onChange={(e) => handlePaymentChange(friend.id, e.target.value)}
+                                />
+                            </div>
                         ))}
                     </div>
                 </div>

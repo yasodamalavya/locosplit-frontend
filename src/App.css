@@ -1,3 +1,4 @@
+/* Base Styles */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #eef2f5;
@@ -7,17 +8,6 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-}
-
-.main-container {
-  max-width: 800px;
-  width: 90%;
-  margin: 20px auto;
-  background-color: #fff;
-  padding: 30px 40px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  color: #333;
 }
 
 h1, h2 {
@@ -63,11 +53,88 @@ h1, h2 {
   background-color: #c0392b;
 }
 
-.section {
-  margin-top: 30px;
+/* Scoped Styles for Homepage */
+.homepage-container {
+  max-width: 800px;
+  width: 90%;
+  margin: 20px auto;
+  background-color: #fff;
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-.form-section {
+.homepage-container .flex-sections {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.homepage-container .section-card {
+  flex: 1;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #e1e1e1;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.homepage-container .dropdown-header {
+  background-color: #f1f5f9;
+  padding: 15px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  transition: background-color 0.3s ease;
+  font-weight: 600;
+  font-size: 18px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.homepage-container .dropdown-header:hover {
+  background-color: #e2e6eb;
+}
+
+.homepage-container .dropdown-content {
+  padding-left: 20px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.homepage-container .dropdown-content.open {
+  max-height: 500px;
+}
+
+.homepage-container .dropdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 16px;
+}
+
+.homepage-container .dropdown-item:last-child {
+  border-bottom: none;
+}
+
+/* Scoped Styles for AddExpense page */
+.add-expense-container {
+  max-width: 800px;
+  width: 90%;
+  margin: 20px auto;
+  background-color: #fff;
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.add-expense-container .form-section {
   background-color: #f9f9f9;
   padding: 25px;
   border-radius: 10px;
@@ -76,19 +143,18 @@ h1, h2 {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
-.form-group {
+.add-expense-container .form-group {
   margin-bottom: 20px;
 }
 
-.form-group label {
+.add-expense-container .form-group label {
   display: block;
   font-weight: 600;
   margin-bottom: 8px;
   color: #2c3e50;
 }
 
-/* This new class applies the styling to all inputs and selects */
-.form-control {
+.add-expense-container .form-control {
   width: 100%;
   padding: 12px;
   background-color: #fff;
@@ -101,20 +167,19 @@ h1, h2 {
   color: #333;
 }
 
-.form-control:focus {
+.add-expense-container .form-control:focus {
   outline: none;
   border-color: #3498db;
   box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
 }
 
-/* Custom Checkbox Styling */
-.checkbox-container {
+.add-expense-container .checkbox-container {
   display: flex;
   align-items: center;
   margin-bottom: 15px;
 }
 
-.checkbox-container input[type="checkbox"] {
+.add-expense-container .checkbox-container input[type="checkbox"] {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -129,12 +194,12 @@ h1, h2 {
   transition: border-color 0.3s ease;
 }
 
-.checkbox-container input[type="checkbox"]:checked {
+.add-expense-container .checkbox-container input[type="checkbox"]:checked {
   border-color: #3498db;
   background-color: #3498db;
 }
 
-.checkbox-container input[type="checkbox"]:checked::after {
+.add-expense-container .checkbox-container input[type="checkbox"]:checked::after {
   content: '✓';
   position: absolute;
   top: 50%;
@@ -144,7 +209,48 @@ h1, h2 {
   font-size: 16px;
 }
 
-.back-link {
+.add-expense-container .payment-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.add-expense-container .payment-input {
+  flex: 1 1 45%;
+  min-width: 250px;
+}
+
+/* Scoped Styles for GroupDetail page */
+.group-detail-container {
+  max-width: 800px;
+  width: 90%;
+  margin: 20px auto;
+  background-color: #fff;
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.group-detail-container ul {
+  list-style-type: disc;
+  padding-left: 20px;
+}
+
+.group-detail-container ul li {
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.group-detail-container .expense-list li {
+  background-color: #f9f9f9;
+  margin-bottom: 15px;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.group-detail-container .back-link {
   display: inline-block;
   margin-top: 20px;
   color: #3498db;
@@ -152,17 +258,6 @@ h1, h2 {
   font-weight: 500;
 }
 
-.back-link:hover {
+.group-detail-container .back-link:hover {
   text-decoration: underline;
-}
-
-.payment-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.payment-input {
-  flex: 1 1 45%;
-  min-width: 250px;
 }
