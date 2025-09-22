@@ -1,4 +1,3 @@
-/* Base Styles */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #eef2f5;
@@ -53,24 +52,17 @@ h1, h2 {
   background-color: #c0392b;
 }
 
-/* Scoped Styles for Homepage */
-.homepage-container {
-  max-width: 800px;
-  width: 90%;
-  margin: 20px auto;
-  background-color: #fff;
-  padding: 30px 40px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+.section {
+  margin-top: 30px;
 }
 
-.homepage-container .flex-sections {
+.flex-sections {
   display: flex;
   justify-content: space-between;
   gap: 20px;
 }
 
-.homepage-container .section-card {
+.section-card {
   flex: 1;
   background-color: #f9f9f9;
   padding: 20px;
@@ -79,7 +71,7 @@ h1, h2 {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
-.homepage-container .dropdown-header {
+.dropdown-header {
   background-color: #f1f5f9;
   padding: 15px 20px;
   border-radius: 8px;
@@ -94,22 +86,22 @@ h1, h2 {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
-.homepage-container .dropdown-header:hover {
+.dropdown-header:hover {
   background-color: #e2e6eb;
 }
 
-.homepage-container .dropdown-content {
+.dropdown-content {
   padding-left: 20px;
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease-out;
 }
 
-.homepage-container .dropdown-content.open {
+.dropdown-content.open {
   max-height: 500px;
 }
 
-.homepage-container .dropdown-item {
+.dropdown-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -119,14 +111,26 @@ h1, h2 {
   font-size: 16px;
 }
 
-.homepage-container .dropdown-item:last-child {
+.dropdown-item:last-child {
   border-bottom: none;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 20px;
+  color: #3498db;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.back-link:hover {
+  text-decoration: underline;
 }
 
 /* Scoped Styles for AddExpense page */
 .add-expense-container {
-  max-width: 800px;
-  width: 90%;
+  max-width: 1000px;
+  width: 95%;
   margin: 20px auto;
   background-color: #fff;
   padding: 30px 40px;
@@ -134,13 +138,24 @@ h1, h2 {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
+.form-columns {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  flex-wrap: wrap; /* Fix for smaller screens */
+}
+
+.form-columns > div {
+  flex: 1;
+}
+
 .add-expense-container .form-section {
   background-color: #f9f9f9;
   padding: 25px;
   border-radius: 10px;
   border: 1px solid #e1e1e1;
-  margin-bottom: 25px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 25px; /* Add margin for mobile */
 }
 
 .add-expense-container .form-group {
@@ -220,37 +235,7 @@ h1, h2 {
   min-width: 250px;
 }
 
-/* Scoped Styles for GroupDetail page */
-.group-detail-container {
-  max-width: 800px;
-  width: 90%;
-  margin: 20px auto;
-  background-color: #fff;
-  padding: 30px 40px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
-
-.group-detail-container ul {
-  list-style-type: disc;
-  padding-left: 20px;
-}
-
-.group-detail-container ul li {
-  margin-bottom: 8px;
-  font-size: 16px;
-}
-
-.group-detail-container .expense-list li {
-  background-color: #f9f9f9;
-  margin-bottom: 15px;
-  padding: 15px;
-  border-radius: 8px;
-  border: 1px solid #eee;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-}
-
-.group-detail-container .back-link {
+.back-link {
   display: inline-block;
   margin-top: 20px;
   color: #3498db;
@@ -258,6 +243,6 @@ h1, h2 {
   font-weight: 500;
 }
 
-.group-detail-container .back-link:hover {
+.back-link:hover {
   text-decoration: underline;
 }

@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getGroups, getFriends, createFriend, createGroup, addExpense } from './api';
+import { getGroups, getFriends, createFriend, createGroup, addExpense, getGroupById } from './api';
 import './App.css';
 
 function AddExpense() {
     const navigate = useNavigate();
-    const [friends, setFriends] = useState([]);
+    const [allFriends, setAllFriends] = useState([]);
     const [groups, setGroups] = useState([]);
+    const [groupMembers, setGroupMembers] = useState([]);
     const [formData, setFormData] = useState({
         description: '',
         groupId: '',
@@ -15,13 +16,16 @@ function AddExpense() {
     });
     const [payments, setPayments] = useState({});
     const [newFriendName, setNewFriendName] = useState('');
+    const [isAddingNewFriend, setIsAddingNewFriend] = useState(false);
+    const [selectedFriendId, setSelectedFriendId] = useState('');
 
     useEffect(() => {
-        const fetchFriendsAndGroups = async () => {
+        const fetchAllData = async () => {
             try {
                 const [friendsList, groupsList] = await Promise.all([getFriends(), getGroups()]);
-                setFriends(friendsList);
+                setAllFriends(friendsList);
                 setGroups(groupsList);
+                setGroupMembers(friendsList);
                 
                 const initialPayments = friendsList.reduce((acc, friend) => {
                     acc[friend.id] = 0;
@@ -33,15 +37,28 @@ function AddExpense() {
                 console.error('Error fetching data:', error);
             }
         };
-        fetchFriendsAndGroups();
+        fetchAllData();
     }, []);
 
-    const handleFormChange = (e) => {
+    const handleFormChange = async (e) => {
         const { name, value, type, checked } = e.target;
         setFormData(prevData => ({
             ...prevData,
             [name]: type === 'checkbox' ? checked : value
         }));
+        
+        if (name === 'groupId' && value) {
+            try {
+                const selectedGroup = await getGroupById(value);
+                setGroupMembers(selectedGroup.members);
+            } catch (error) {
+                console.error('Error fetching group members:', error);
+                setGroupMembers([]);
+            }
+        } else if (name === 'isNewGroup' && checked) {
+            setGroupMembers([]);
+            setPayments({});
+        }
     };
 
     const handlePaymentChange = (friendId, amount) => {
@@ -57,17 +74,30 @@ function AddExpense() {
 
     const handleAddFriend = async (e) => {
         e.preventDefault();
-        if (newFriendName.trim() === '') return;
+        
+        let friendToAdd;
+        if (isAddingNewFriend) {
+            if (newFriendName.trim() === '') return;
+            try {
+                const newFriend = await createFriend(newFriendName);
+                friendToAdd = newFriend;
+            } catch (error) {
+                console.error('Error creating new friend:', error);
+                alert('Failed to create new friend.');
+                return;
+            }
+        } else {
+            if (!selectedFriendId) return;
+            friendToAdd = allFriends.find(f => f.id === parseInt(selectedFriendId));
+        }
 
-        try {
-            const newFriend = await createFriend(newFriendName);
-            setFriends(prevFriends => [...prevFriends, newFriend]);
-            setPayments(prevPayments => ({ ...prevPayments, [newFriend.id]: 0 }));
+        if (friendToAdd) {
+            setGroupMembers(prevMembers => [...prevMembers, friendToAdd]);
+            setAllFriends(prevAllFriends => prevAllFriends.filter(f => f.id !== friendToAdd.id));
+            setPayments(prevPayments => ({...prevPayments, [friendToAdd.id]: 0}));
             setNewFriendName('');
-            alert(`${newFriend.name} added successfully!`);
-        } catch (error) {
-            console.error('Error adding friend:', error);
-            alert('Failed to add friend.');
+            setSelectedFriendId('');
+            setIsAddingNewFriend(false);
         }
     };
     
@@ -83,7 +113,7 @@ function AddExpense() {
                     amount: parseFloat(amount)
                 }));
             
-            const allMemberIds = friends.map(friend => friend.id);
+            const allMemberIds = groupMembers.map(friend => friend.id);
 
             if (formData.isNewGroup && formData.newGroupName) {
                 if (allMemberIds.length === 0) {
@@ -103,8 +133,7 @@ function AddExpense() {
             const expensePayload = {
                 description: formData.description,
                 groupId: parseInt(finalGroupId),
-                payments: finalPayments,
-                allMemberIds: allMemberIds
+                payments: finalPayments
             };
 
             await addExpense(expensePayload);
@@ -125,55 +154,61 @@ function AddExpense() {
                     <input type="text" name="description" value={formData.description} onChange={handleFormChange} required className="form-control" />
                 </div>
                 
-                <div className="form-section">
-                    <h2>Which Group?</h2>
-                    <div className="form-group">
-                        <select 
-                            name="groupId" 
-                            value={formData.groupId || ''} 
-                            onChange={handleFormChange} 
-                            required={!formData.isNewGroup}
-                            className="form-control"
-                        >
-                            <option value="">Select a group</option>
-                            {groups.map(group => (
-                                <option key={group.id} value={group.id}>{group.name}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="checkbox-container">
-                        <input type="checkbox" name="isNewGroup" checked={formData.isNewGroup} onChange={handleFormChange} />
-                        <label>Create new group</label>
-                    </div>
-                    {formData.isNewGroup && (
+                <div className="form-columns">
+                    <div className="form-section">
+                        <h2>Which Group?</h2>
                         <div className="form-group">
-                            <input 
-                                type="text" 
-                                name="newGroupName" 
-                                value={formData.newGroupName} 
+                            <select 
+                                name="groupId" 
+                                value={formData.groupId || ''} 
                                 onChange={handleFormChange} 
-                                placeholder="Enter new group's name" 
-                                required 
+                                required={!formData.isNewGroup}
                                 className="form-control"
-                            />
+                            >
+                                <option value="">Select a group</option>
+                                {groups.map(group => (
+                                    <option key={group.id} value={group.id}>{group.name}</option>
+                                ))}
+                            </select>
                         </div>
-                    )}
-                </div>
-
-                <div className="form-section">
-                    <h2>Who Paid & How Much?</h2>
-                    <div className="payment-list">
-                        {friends.map(friend => (
-                            <div key={friend.id} className="payment-input">
-                                <label>{friend.name} paid:</label>
-                                <input
-                                    type="number"
+                        <div className="checkbox-container">
+                            <input type="checkbox" name="isNewGroup" checked={formData.isNewGroup} onChange={handleFormChange} />
+                            <label>Create new group</label>
+                        </div>
+                        {formData.isNewGroup && (
+                            <div className="form-group">
+                                <input 
+                                    type="text" 
+                                    name="newGroupName" 
+                                    value={formData.newGroupName} 
+                                    onChange={handleFormChange} 
+                                    placeholder="Enter new group's name" 
+                                    required 
                                     className="form-control"
-                                    value={payments[friend.id] || ''}
-                                    onChange={(e) => handlePaymentChange(friend.id, e.target.value)}
                                 />
                             </div>
-                        ))}
+                        )}
+                    </div>
+
+                    <div className="form-section">
+                        <h2>Who Paid & How Much?</h2>
+                        {groupMembers.length > 0 ? (
+                            <div className="payment-list">
+                                {groupMembers.map(friend => (
+                                    <div key={friend.id} className="payment-input">
+                                        <label>{friend.name} paid:</label>
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            value={payments[friend.id] || ''}
+                                            onChange={(e) => handlePaymentChange(friend.id, e.target.value)}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p>Add friends to the group below.</p>
+                        )}
                     </div>
                 </div>
                 
@@ -184,7 +219,20 @@ function AddExpense() {
                 <h2>Add a New Friend</h2>
                 <form onSubmit={handleAddFriend}>
                     <div className="form-group">
-                        <input type="text" value={newFriendName} onChange={handleNewFriendChange} placeholder="Enter new friend's name" required className="form-control" />
+                        <div className="checkbox-container">
+                            <input type="checkbox" checked={isAddingNewFriend} onChange={(e) => setIsAddingNewFriend(e.target.checked)} />
+                            <label>Add a new friend</label>
+                        </div>
+                        {isAddingNewFriend ? (
+                            <input type="text" value={newFriendName} onChange={handleNewFriendChange} placeholder="Enter new friend's name" required className="form-control" />
+                        ) : (
+                            <select value={selectedFriendId} onChange={(e) => setSelectedFriendId(e.target.value)} className="form-control" >
+                                <option value="">Select an existing friend</option>
+                                {allFriends.filter(f => !groupMembers.some(m => m.id === f.id)).map(friend => (
+                                    <option key={friend.id} value={friend.id}>{friend.name}</option>
+                                ))}
+                            </select>
+                        )}
                     </div>
                     <button type="submit" className="button">Add Friend</button>
                 </form>
