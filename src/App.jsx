@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getGroups, getFriends, deleteFriend, deleteGroup } from './api'; // <-- Import delete functions
+import { getGroups, getFriends, deleteFriend, deleteGroup } from './api';
 import './App.css';
 
 function App() {
   const [groups, setGroups] = useState([]);
   const [friends, setFriends] = useState([]);
+  const [openGroups, setOpenGroups] = useState(true); // State to manage dropdown open/close
+  const [openFriends, setOpenFriends] = useState(true);
 
   const fetchAllData = async () => {
     try {
@@ -25,7 +27,7 @@ function App() {
     try {
       if (window.confirm("Are you sure you want to delete this friend? This will fail if they have expenses.")) {
         await deleteFriend(id);
-        fetchAllData(); // Re-fetch to update the UI
+        fetchAllData(); 
       }
     } catch (error) {
       console.error('Error deleting friend:', error);
@@ -37,7 +39,7 @@ function App() {
     try {
       if (window.confirm("Are you sure you want to delete this group? All expenses will be lost.")) {
         await deleteGroup(id);
-        fetchAllData(); // Re-fetch to update the UI
+        fetchAllData(); 
       }
     } catch (error) {
       console.error('Error deleting group:', error);
@@ -46,40 +48,48 @@ function App() {
   };
 
   return (
-    <div className="container">
+    <div className="main-container">
       <h1>My LocalSplit App</h1>
       <Link to="/add-expense" className="button">Add a New Expense</Link>
       
       <div className="section">
-        <h2>Your Groups</h2>
-        {groups.length > 0 ? (
-          <ul>
-            {groups.map((group) => (
-              <li key={group.id}>
-                <Link to={`/groups/${group.id}`}>{group.name}</Link>
-                <button onClick={() => handleDeleteGroup(group.id)} className="delete-button">Delete</button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No groups created yet.</p>
-        )}
+        <div className="dropdown-header" onClick={() => setOpenGroups(!openGroups)}>
+          <h2>Your Groups</h2>
+        </div>
+        <div className={`dropdown-content ${openGroups ? 'open' : ''}`}>
+          {groups.length > 0 ? (
+            <ul>
+              {groups.map((group) => (
+                <li key={group.id} className="dropdown-item">
+                  <Link to={`/groups/${group.id}`}>{group.name}</Link>
+                  <button onClick={() => handleDeleteGroup(group.id)} className="delete-button">Delete</button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No groups created yet.</p>
+          )}
+        </div>
       </div>
 
       <div className="section">
-        <h2>Your Friends</h2>
-        {friends.length > 0 ? (
-          <ul>
-            {friends.map((friend) => (
-              <li key={friend.id}>
-                {friend.name}
-                <button onClick={() => handleDeleteFriend(friend.id)} className="delete-button">Delete</button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No friends added yet.</p>
-        )}
+        <div className="dropdown-header" onClick={() => setOpenFriends(!openFriends)}>
+          <h2>Your Friends</h2>
+        </div>
+        <div className={`dropdown-content ${openFriends ? 'open' : ''}`}>
+          {friends.length > 0 ? (
+            <ul>
+              {friends.map((friend) => (
+                <li key={friend.id} className="dropdown-item">
+                  <span>{friend.name}</span>
+                  <button onClick={() => handleDeleteFriend(friend.id)} className="delete-button">Delete</button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No friends added yet.</p>
+          )}
+        </div>
       </div>
     </div>
   );

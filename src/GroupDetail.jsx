@@ -9,9 +9,6 @@ function GroupDetail() {
     const [expenses, setExpenses] = useState([]);
     const [balances, setBalances] = useState({});
     const [friends, setFriends] = useState([]);
-    const [newFriendId, setNewFriendId] = useState('');
-    const [newFriendName, setNewFriendName] = useState('');
-    const [isAddingNewFriend, setIsAddingNewFriend] = useState(false);
 
     const fetchData = async () => {
         try {
@@ -32,35 +29,12 @@ function GroupDetail() {
         fetchData();
     }, [groupId]);
 
-    const handleAddFriendSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            let friendId = newFriendId;
-            if (isAddingNewFriend && newFriendName) {
-                const newFriend = await createFriend(newFriendName);
-                friendId = newFriend.id;
-            }
-
-            if (friendId) {
-                await addFriendToGroup(groupId, friendId);
-                alert('Friend added to group and shares recalculated!');
-                setNewFriendId('');
-                setNewFriendName('');
-                setIsAddingNewFriend(false);
-                fetchData(); // Re-fetch data to update the UI
-            }
-        } catch (error) {
-            console.error('Error adding friend to group:', error);
-            alert('Failed to add friend. Check console for details.');
-        }
-    };
-
     if (!group) {
-        return <div className="container">Loading group details...</div>;
+        return <div className="main-container">Loading group details...</div>;
     }
 
     return (
-        <div className="container">
+        <div className="main-container">
             <h1>Group: {group.name}</h1>
             <Link to="/" className="back-link">Back to Home</Link>
             
@@ -71,26 +45,6 @@ function GroupDetail() {
                         <li key={member.id}>{member.name}</li>
                     ))}
                 </ul>
-                <form onSubmit={handleAddFriendSubmit} className="add-friend-form">
-                    <div className="form-group">
-                        <label>Add new member:</label>
-                        <div className="checkbox-container">
-                            <input type="checkbox" checked={isAddingNewFriend} onChange={(e) => setIsAddingNewFriend(e.target.checked)} />
-                            <label>Add new friend</label>
-                        </div>
-                        {isAddingNewFriend ? (
-                            <input type="text" value={newFriendName} onChange={(e) => setNewFriendName(e.target.value)} placeholder="Enter new friend's name" required />
-                        ) : (
-                            <select value={newFriendId} onChange={(e) => setNewFriendId(e.target.value)} required>
-                                <option value="">Select an existing friend</option>
-                                {friends.filter(f => !group.members.some(m => m.id === f.id)).map(friend => (
-                                    <option key={friend.id} value={friend.id}>{friend.name}</option>
-                                ))}
-                            </select>
-                        )}
-                    </div>
-                    <button type="submit" className="button">Add Friend</button>
-                </form>
             </div>
             
             <div className="section">
